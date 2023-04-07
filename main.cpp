@@ -2,7 +2,7 @@
 * [x] 색상변경칸 기능 부여
 * [x] 크기변경칸 기능 부여
 * [x] 모양변경칸 기능 부여
-* [ ] 돌 번갈아가며 움직이도록 변경
+* [x] 돌 번갈아가며 움직이도록 변경
 */
 
 #include <windows.h>
@@ -21,6 +21,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 	PAINTSTRUCT ps;
 
 	static Field field { 40, 40 };
+	static bool s1moved = false;
+	static bool s2moved = false;
 
 	switch(iMsg) {
 	case WM_CREATE:
@@ -30,42 +32,62 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 		case VK_ESCAPE:
 			PostQuitMessage(0);
 			break;
-		case L'a': case L'A':
-			field.moveLeft(0);
-			break;
-		case L'd': case L'D':
-			field.moveRight(0);
-			break;
-		case L'w': case L'W':
-			field.moveUp(0);
-			break;
-		case L's': case L'S':
-			field.moveDown(0);
-			break;
 		case L'r': case L'R':
 			field.reset();
+			break;
 		}
+		if(s1moved == false && s2moved == false) {
+			switch(wParam) {
+			case L'a': case L'A':
+				field.moveLeft(0);
+				s1moved = true;
+				break;
+			case L'd': case L'D':
+				field.moveRight(0);
+				s1moved = true;
+				break;
+			case L'w': case L'W':
+				field.moveUp(0);
+				s1moved = true;
+				break;
+			case L's': case L'S':
+				field.moveDown(0);
+				s1moved = true;
+				break;
+			}
+		}
+		InvalidateRect(hWnd, NULL, TRUE);
 		break;
 	case WM_KEYDOWN:
-		switch(wParam) {
-		case VK_LEFT:
-			field.moveLeft(1);
-			break;
-		case VK_RIGHT:
-			field.moveRight(1);
-			break;
-		case VK_UP:
-			field.moveUp(1);
-			break;
-		case VK_DOWN:
-			field.moveDown(1);
-			break;
+		if(s2moved == false && s1moved == true) {
+			switch(wParam) {
+			case VK_LEFT:
+				field.moveLeft(1);
+				s2moved = true;
+				break;
+			case VK_RIGHT:
+				field.moveRight(1);
+				s2moved = true;
+				break;
+			case VK_UP:
+				field.moveUp(1);
+				s2moved = true;
+				break;
+			case VK_DOWN:
+				field.moveDown(1);
+				s2moved = true;
+				break;
+			}
 		}
 		InvalidateRect(hWnd, NULL, TRUE);
 		break;
 	case WM_PAINT: {
 		hdc = BeginPaint(hWnd, &ps);
 		field.show(hWnd, hdc);
+		if(s1moved == true && s2moved == true) {
+			s1moved = false;
+			s2moved = false;
+		}
 		EndPaint(hWnd, &ps);
 	} break;
 	case WM_DESTROY:
