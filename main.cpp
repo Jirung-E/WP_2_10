@@ -3,6 +3,8 @@
 * [x] 크기변경칸 기능 부여
 * [x] 모양변경칸 기능 부여
 * [x] 돌 번갈아가며 움직이도록 변경
+*     [x] 에러메세지 출력
+*     [x] 서로 안겹치도록
 */
 
 #include <windows.h>
@@ -23,6 +25,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 	static Field field { 40, 40 };
 	static bool s1moved = false;
 	static bool s2moved = false;
+	static bool s1error = false;
+	static bool s2error = false;
 
 	switch(iMsg) {
 	case WM_CREATE:
@@ -34,6 +38,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 			break;
 		case L'r': case L'R':
 			field.reset();
+			break;
+		case VK_RETURN:
+			field.generateMaze();
 			break;
 		}
 		if(s1moved == false && s2moved == false) {
@@ -53,6 +60,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 			case L's': case L'S':
 				field.moveDown(0);
 				s1moved = true;
+				break;
+			}
+		}
+		else {
+			switch(wParam) {
+			case L'a': case L'A':
+			case L'd': case L'D':
+			case L'w': case L'W':
+			case L's': case L'S':
+				Beep(500, 100);
+				s1error = true;
 				break;
 			}
 		}
@@ -79,6 +97,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 				break;
 			}
 		}
+		else {
+			switch(wParam) {
+			case VK_LEFT:
+			case VK_RIGHT:
+			case VK_UP:
+			case VK_DOWN:
+				Beep(1000, 100);
+				s2error = true;
+				break;
+			}
+		}
 		InvalidateRect(hWnd, NULL, TRUE);
 		break;
 	case WM_PAINT: {
@@ -87,6 +116,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam) {
 		if(s1moved == true && s2moved == true) {
 			s1moved = false;
 			s2moved = false;
+		}
+		if(s1error || s2error) {
+			TCHAR str[100];
+			wsprintf(str, L"이미 움직인 돌입니다. 다른 돌을 움직여주세요.");
+			TextOut(hdc, 0, 0, str, lstrlen(str));
+			s1error = false;
+			s2error = false;
 		}
 		EndPaint(hWnd, &ps);
 	} break;

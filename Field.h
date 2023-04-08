@@ -32,6 +32,8 @@ public:
 	void moveUp(int stone_index);
 	void moveDown(int stone_index);
 
+	void generateMaze();
+
 private:
 	void updateStone(int stone_index);
 	void syncSize(const HWND& hwnd);

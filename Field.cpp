@@ -13,7 +13,6 @@ tile { col }, stone { { 0, 0 }, { row-1, col-1 } } {
 		}
 	}
 	setObjects();
-	//tile[5][5] = new Obstacle { 5, 5 };
 }
 
 
@@ -108,6 +107,13 @@ void Field::setObjects() {
 			break;
 		}
 	}
+
+	stone[0].x = 0;
+	stone[0].y = 0;
+	stone[0].changeShape();
+	stone[1].x = row-1;
+	stone[1].y = col-1;
+	stone[1].changeShape();
 }
 
 void Field::updateStone(int stone_index) {
@@ -131,6 +137,10 @@ void Field::moveLeft(int stone_index) {
 		}
 	}
 	s.x = next_x;
+	if(stone[0].x == stone[1].x && stone[0].y == stone[1].y) {
+		moveRight(stone_index);
+		return;
+	}
 	updateStone(stone_index);
 }
 
@@ -146,6 +156,10 @@ void Field::moveRight(int stone_index) {
 		}
 	}
 	s.x = next_x;
+	if(stone[0].x == stone[1].x && stone[0].y == stone[1].y) {
+		moveLeft(stone_index);
+		return;
+	}
 	updateStone(stone_index);
 }
 
@@ -161,6 +175,10 @@ void Field::moveUp(int stone_index) {
 		}
 	}
 	s.y = next_y;
+	if(stone[0].x == stone[1].x && stone[0].y == stone[1].y) {
+		moveDown(stone_index);
+		return;
+	}
 	updateStone(stone_index);
 }
 
@@ -176,5 +194,33 @@ void Field::moveDown(int stone_index) {
 		}
 	}
 	s.y = next_y;
+	if(stone[0].x == stone[1].x && stone[0].y == stone[1].y) {
+		moveUp(stone_index);
+		return;
+	}
 	updateStone(stone_index);
+}
+
+
+
+void Field::generateMaze() {
+	// 일단 꽉 채우기
+	for(int i=0; i<col; ++i) {
+		for(int k=0; k<row; ++k) {
+			tile[i][k] = new Obstacle { k, i };
+		}
+	}
+
+	// 플레이어 배치
+	stone[0].x = 1;
+	stone[0].y = 1;
+	stone[1].x = row-2;
+	stone[1].y = col-2;
+	delete tile[1][1];
+	tile[1][1] = nullptr;
+	delete tile[col-2][row-2];
+	tile[col-2][row-2] = nullptr;
+
+	// 구멍뚫기
+
 }
